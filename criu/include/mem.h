@@ -15,6 +15,7 @@ struct mem_dump_ctl {
 	bool	lazy;
 };
 
+extern bool page_is_zero(u64 pme);
 extern bool page_in_parent(bool dirty);
 extern int prepare_mm_pid(struct pstree_item *i);
 extern void prepare_cow_vmas(void);
