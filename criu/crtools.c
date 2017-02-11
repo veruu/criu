@@ -50,6 +50,7 @@
 
 #include "setproctitle.h"
 #include "sysctl.h"
+#include "img-remote.h"
 
 #include "../soccr/soccr.h"
 
@@ -290,6 +291,7 @@ int main(int argc, char *argv[], char *envp[])
 		BOOL_OPT("display-stats", &opts.display_stats),
 		BOOL_OPT("weak-sysctls", &opts.weak_sysctls),
 		{ "status-fd",			required_argument,	0, 1088 },
+		{ "remote",			no_argument,		0, 1089 },
 		{ },
 	};
 
@@ -576,6 +578,9 @@ int main(int argc, char *argv[], char *envp[])
 				return 1;
 			}
 			break;
+		case 1089:
+			opts.remote = true;
+			break;
 		case 'V':
 			pr_msg("Version: %s\n", CRIU_VERSION);
 			if (strcmp(CRIU_GITID, "0"))
@@ -748,6 +753,12 @@ int main(int argc, char *argv[], char *envp[])
 	if (!strcmp(argv[optind], "page-server"))
 		return cr_page_server(opts.daemon_mode, false, -1) != 0;
 
+	if (!strcmp(argv[optind], "image-cache"))
+		return image_cache(opts.daemon_mode, DEFAULT_CACHE_SOCKET, opts.port);
+
+	if (!strcmp(argv[optind], "image-proxy"))
+		return image_proxy(opts.daemon_mode, DEFAULT_PROXY_SOCKET, opts.addr, opts.port);
+
 	if (!strcmp(argv[optind], "service"))
 		return cr_service(opts.daemon_mode);
 
@@ -776,6 +787,8 @@ usage:
 "  criu service [<options>]\n"
 "  criu dedup\n"
 "  criu lazy-pages -D DIR [<options>]\n"
+"  criu image-cache [<options>]\n"
+"  criu image-proxy [<options>]\n"
 "\n"
 "Commands:\n"
 "  dump           checkpoint a process/tree identified by pid\n"
@@ -787,6 +800,8 @@ usage:
 "  dedup          remove duplicates in memory dump\n"
 "  cpuinfo dump   writes cpu information into image file\n"
 "  cpuinfo check  validates cpu information read from image file\n"
+"  image-proxy    launch dump-side proxy to sent images\n"
+"  image-cache    launch restore-side cache to reveive images\n"
 	);
 
 	if (usage_error) {
@@ -842,6 +857,8 @@ usage:
 "                            macvlan[IFNAME]:OUTNAME\n"
 "                            mnt[COOKIE]:ROOT\n"
 "\n"
+"  --remote              dump/restore images directly to/from remote node using\n"
+"                        image-proxy/image-cache\n"
 "* Special resources support:\n"
 "     --" SK_EST_PARAM "  checkpoint/restore established TCP connections\n"
 "     --" SK_INFLIGHT_PARAM "   skip (ignore) in-flight TCP connections\n"
@@ -929,7 +946,7 @@ usage:
 "\n"
 "Page/Service server options:\n"
 "  --address ADDR        address of server or service\n"
-"  --port PORT           port of page server\n"
+"  --port PORT           port of page serve or service\n"
 "  -d|--daemon           run in the background after creating socket\n"
 "  --status-fd FD        write \\0 to the FD and close it once process is ready\n"
 "                        to handle requests\n"
