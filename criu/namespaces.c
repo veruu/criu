@@ -2353,7 +2353,7 @@ int __set_user_ns(struct ns_id *ns)
 
 	fd = fdstore_get(ns->user.nsfd_id);
 	if (fd < 0) {
-		pr_perror("Can't get ns fd");
+		pr_err("Can't get ns fd\n");
 		return -1;
 	}
 	if (setns(fd, CLONE_NEWUSER) < 0) {
