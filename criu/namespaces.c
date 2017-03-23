@@ -1363,7 +1363,7 @@ static int write_id_map(pid_t pid, UidGidExtent **extents, int n, char *id_map)
 	snprintf(buf, PAGE_SIZE, "%d/%s", pid, id_map);
 	fd = openat(fd, buf, O_WRONLY);
 	if (fd < 0) {
-		pr_perror("Can't open %s\n", buf);
+		pr_perror("Can't open %s", buf);
 		return -1;
 	}
 
@@ -2251,7 +2251,7 @@ static int create_user_ns_hierarhy_fn(void *in_arg)
 
 		errno = 0;
 		if (wait(&status) < 0 || !WIFEXITED(status) || WEXITSTATUS(status)) {
-			pr_perror("Child process waiting: %d\n", status);
+			pr_perror("Child process waiting: %d", status);
 			goto out;
 		}
 	}
