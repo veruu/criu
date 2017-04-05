@@ -120,8 +120,8 @@ struct cr_options {
 	int			weak_sysctls;
 	int			status_fd;
 	bool			orphan_pts_master;
-	bool			check_only;
-	bool			remote;
+	int			check_only;
+	int			remote;
 };
 
 extern struct cr_options opts;
