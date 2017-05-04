@@ -33,6 +33,7 @@
 #include <compel/compel.h>
 #include "netfilter.h"
 #include "linux/userfaultfd.h"
+#include "netfilter.h"
 
 struct kerndat_s kdat = {
 };
