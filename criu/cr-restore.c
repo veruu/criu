@@ -322,7 +322,7 @@ static int run_post_prepare(void)
 
 static int root_prepare_shared(void)
 {
-	int ret = 0, i;
+	int ret = 0;
 	struct pstree_item *pi;
 
 	pr_info("Preparing info about shared resources\n");
@@ -333,11 +333,8 @@ static int root_prepare_shared(void)
 	if (prepare_seccomp_filters())
 		return -1;
 
-	for (i = 0; i < ARRAY_SIZE(cinfos); i++) {
-		ret = collect_image(cinfos[i]);
-		if (ret)
-			return -1;
-	}
+	if (collect_images(cinfos, ARRAY_SIZE(cinfos)))
+		return -1;
 
 	for_each_pstree_item(pi) {
 		if (pi->pid->state == TASK_HELPER)
@@ -1728,8 +1725,6 @@ static int restore_task_with_children(void *_arg)
 
 	/* Restore root task */
 	if (current->parent == NULL) {
-		int i;
-
 		if (join_namespaces()) {
 			pr_perror("Join namespaces failed");
 			goto err;
@@ -1746,12 +1741,8 @@ static int restore_task_with_children(void *_arg)
 		if (mount_proc())
 			goto err;
 
-		for (i = 0; i < ARRAY_SIZE(before_ns_cinfos); i++) {
-			ret = collect_image(before_ns_cinfos[i]);
-			if (ret)
-				return -1;
-		}
-
+		if (collect_images(before_ns_cinfos, ARRAY_SIZE(before_ns_cinfos)))
+			goto err;
 
 		if (prepare_namespace(current, ca->clone_flags))
 			goto err;
