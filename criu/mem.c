@@ -835,8 +835,10 @@ static int restore_priv_vma_content(struct pstree_item *t, struct page_read *pr)
 	unsigned int nr_lazy = 0;
 	unsigned long va;
 
-	if (opts.check_only)
+	if (opts.check_only) {
+		pr->close(pr);
 		return 0;
+	}
 
 	vma = list_first_entry(vmas, struct vma_area, list);
 	rsti(t)->pages_img_id = pr->pages_img_id;
@@ -858,9 +860,9 @@ static int restore_priv_vma_content(struct pstree_item *t, struct page_read *pr)
 		 * This means that userfaultfd is used to load the pages
 		 * on demand.
 		 */
-		if (opts.lazy_pages && pagemap_lazy(pr.pe)) {
+		if (opts.lazy_pages && pagemap_lazy(pr->pe)) {
 			pr_debug("Lazy restore skips %ld pages at %lx\n", nr_pages, va);
-			pr.skip_pages(&pr, nr_pages * PAGE_SIZE);
+			pr->skip_pages(pr, nr_pages * PAGE_SIZE);
 			nr_lazy += nr_pages;
 			continue;
 		}
