@@ -439,10 +439,10 @@ int collect_shmem(int pid, struct vma_area *vma)
 	return 0;
 }
 
-static int shmem_wait_and_open(int pid, struct shmem_info *si, VmaEntry *vi)
+static int shmem_wait_and_open(struct shmem_info *si, VmaEntry *vi)
 {
 	char path[128];
-	int ret;
+	int pid, ret;
 
 	pr_info("Waiting for the %lx shmem to appear\n", si->shmid);
 	futex_wait_while(&si->lock, 0);
@@ -519,7 +519,7 @@ static int open_shmem(int pid, struct vma_area *vma)
 	BUG_ON(si->pid == SYSVIPC_SHMEM_PID);
 
 	if (si->pid != pid)
-		return shmem_wait_and_open(pid, si, vi);
+		return shmem_wait_and_open(si, vi);
 
 	if (si->fd != -1) {
 		f = dup(si->fd);
